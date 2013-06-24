@@ -4,19 +4,29 @@ require 'mysql2'
 ###
 # Modular Sql (queries)
 #
-# Modular Sql api initially intended for Bionline (http://bion-line.com).
+# Modular Sql is a modular query builder that enables a high database compatibility, usage 
+# easiness and dynamic construction. It is intended to allow any kind of query in any database,
+# but will, at the moment, only handle relatively simple ones to most common databases.
+#
+# This api was initially intended for Bionline (http://bion-line.com).
+# 
 # Output is given as a MysqlResult object, more info @ https://github.com/brianmario/mysql2#usage
 # @author Sebastián (Sikian) Neira Farriol, <sikian@gmail.com>
 # @version 0.1
 #
-# @example Simple usage
+# @example Simple select
 # 	result = Array.new
-# 	result = MdlSql::select().from(:users).where(:id, 1, '=').execute()
+# 	result = MdlSql::select.from(:users).where(:id, 1, '=').execute
+#
+# @example Simple insert
+#  	result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
 
 module MdlSql
 	# @!method select()
 	# @!method insert()
 	# @!method update()
+	# 	Calls SqlQuery.config to configurate futures queries. 
+	# 	@todo Allow many simultaneous configurations. At the moment
 	# @!method config()
 	# 	@option values [Symbol]
 	
@@ -24,29 +34,27 @@ module MdlSql
 
 	@host = String.new
 
-	def self.select()
+	def select()
 	  query = SqlQuery.new.select()
-	  
-	  # select_hash.each_pair do |key, val|
-	  #   query.as(val, key)
-	  # end
-
 	  return query
 	end
 
-	def self.insert
-		puts 'Inserting'
+	def insert
+		query = SqlQuery.new.insert()
+	  return query
 	end
 
-	def self.update
-		puts 'Updating'
+	def update
+		query = SqlQuery.new.update()
+	  return query
 	end
+
 
 	def config(values={})
 		SqlQuery.config(values)
 	end
 
-	module_function :config
+	module_function :config, :select, :insert, :update
 	
 	class SqlQuery	
 		# Public
@@ -63,10 +71,13 @@ module MdlSql
 		# @!method update_ex()
 		# 	@note Still not implemented.
 
+
+
+
 	  def initialize
 	    # Initializes query as a string
 	    #   @return self [SqlQuery] so other methods may be concatenated.
-			@where = Array.new
+			# @where = Array.new
 			return self
 	  end
 
@@ -75,6 +86,7 @@ module MdlSql
 			@@username = values[:username]
 			@@password = values[:password]
 			@@db = values[:database]
+			@@socket = values[:socket]
 
 			if values[:parse] == :yml || values[:parse] == :yaml
 				if values[:file]
@@ -96,16 +108,42 @@ module MdlSql
 			
 			return self
 	  end
+
+	  def insert()
+	  	@method = :insert
+			return self
+	  end
+
+	  def update()
+	  	@method = :update
+			return self
+	  end
 	  
-	  def column(column, alias_name)
-			#		@return (@see initialize)
+	  def column(*values)
+	  	# @todo check column uniqueness in hash
+	  	# @todo revise 
+			#	@return (@see initialize)
 			@cols ||= Hash.new
-			@cols.update({alias_name.to_sym => column})
+
+
+			if values[0].is_a? Hash
+				values.each do |val|
+					@cols.update(val)
+				end
+				
+			else
+				values.each do |val|
+					@cols.update({val => val})
+				end
+			end
 			return self
 		end
 
+		alias_method :cols, :column
+
 	  def from(table, table_alias=nil)
-			# 
+			# Selects table from which to select (or insert, update) with possible alias.
+			# @note use into() when inserting for readability.
 			#	@return (@see initialize)
 			table = table.to_sym if table.is_a? String
 			table_alias = table_alias if table_alias.is_a? String
@@ -114,7 +152,11 @@ module MdlSql
 			@from_alias = table_alias unless table_alias.nil?
 			return self
 		end
+
+		# alias into() and from() select table 
+		alias_method :into, :from
 	  
+
 	  def where(first, second=nil, comp=nil)
 			# @param first [String, Array] as a string it can be the whole WHERE declaration or just the first element. As an Array, it contains a list of where declarations
 			if second.nil?
@@ -129,6 +171,15 @@ module MdlSql
 
 			return self
 		end
+
+		def values(*val)
+			@values ||= Array.new
+
+			@values << val
+
+			return self
+		end
+
 
 	  def execute
 		# TODO config for different db
@@ -145,19 +196,18 @@ module MdlSql
 			
 			query = String.new
 
-			case @method
-			when :select
-				query = select_ex()							
-			end
+			@@socket ||= :mysql
+			query = self.send("#{@method}_#{@@socket}")
+
 
 			@result = client.query query
 			return @result
-			# return client
+			# return query
 		end
 
 		private
 
-		def select_ex()
+		def select_mysql()
 			query = String.new
 			query = "SELECT"
 
@@ -175,7 +225,7 @@ module MdlSql
 				query << " FROM #{@from}"
 				query << " AS #{@from_alias}" if @table_alias
 			else
-				raise "No table at select query"
+				raise "No table at select query."
 			end
 			
 			# @leftjoin = {:tablealias => {:name => "tablename", :on => "oncondition"}...}
@@ -192,6 +242,47 @@ module MdlSql
 				end
 			end
 			puts query
+			return query
+		end
+
+		def insert_mysql()
+			# INSERT INTO table (column1, column2) VALUES (v1c1, v1c2), (v2c1, v2c2)
+
+			query = String.new
+			query = 'INSERT INTO'
+
+			if @from
+				query << " #{@from}"
+			else
+				raise "No table at insert query."
+			end
+
+			puts @cols.inspect
+			if @cols && @cols.count > 0
+				query << ' ('
+				@cols.each do |key,col|
+					query << "#{col},"
+				end
+
+				query.chop! << ')'
+			end
+
+			query << ' VALUES'
+
+			if @values
+				@values.each do |row|
+					query << ' ('
+					row.each do |val|
+						query << "'#{val}'" << ','
+					end
+					query.chop!
+					query << '),'
+				end
+				query.chop!
+			else
+				raise 'No values to insert.'
+			end
+
 			return query
 		end
 	end
