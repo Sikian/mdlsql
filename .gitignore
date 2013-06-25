@@ -17,6 +17,10 @@ tmp
 _yardoc
 doc/
 
+# Configs and tests
+test.rb
+*.yml
+*.yaml
 
 # Packages #
 ############
