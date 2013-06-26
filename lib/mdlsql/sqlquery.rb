@@ -70,17 +70,17 @@ module MdlSql
 	  
 	  ###
 	  # Parameters setting:
-	  # 	column / cols
+	  # 	columns / cols
 	  # 	from / into
 	  # 	where
 	  # 	values
 	  # 	set
 	  #
 
-	  def column(*values)
+	  def columns(*values)
 	  	# @todo check column uniqueness in hash
 	  	# @todo revise 
-			#	@return (@see initialize)
+		# @return (@see initialize)
 			@cols ||= Hash.new
 
 

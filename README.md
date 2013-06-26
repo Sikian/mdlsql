@@ -1,22 +1,29 @@
-MdlSql
-======
+# Mdlsql
 
-Modular Sql (queries)
+TODO: Write a gem description
 
-Modular Sql is a modular query builder that enables a high database compatibility, usage 
-easiness and dynamic construction. It is intended to allow any kind of query in any database,
-but will, at the moment, only handle relatively simple ones to most common databases.
+## Installation
 
-This api was initially intended for Bionline (http://bion-line.com).
- 
-Output is given as a MysqlResult object, more info @ https://github.com/brianmario/mysql2usage
+Add this line to your application's Gemfile:
 
-@author Sebastián (Sikian) Neira Farriol, <sikian@gmail.com>
-@version 0.1
+    gem 'mdlsql'
 
-@example Simple select
- 	result = Array.new
- 	result = MdlSql::select.from(:users).where(:id, 1, '=').execute
+And then execute:
 
-@example Simple insert
-  	result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install mdlsql
+
+## Usage
+
+TODO: Write usage instructions here
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
