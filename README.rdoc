@@ -13,10 +13,10 @@ No joins
 == Usage
 
 Simple select:
- 	result = Array.new
- 	result = MdlSql::select.from(:users).where(:id, 1, '=').execute
+ result = Array.new
+ result = MdlSql::select.from(:users).where(:id, 1, '=').execute
 
 When selecting columns use .cols()/.columns, which can receive a Hash or an Array. In case a Hash is passed, the key will be the alias and the value the actual name of the column (f.e. 'users.username').
 
 Simple insert
-  result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
+ result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
