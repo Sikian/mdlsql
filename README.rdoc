@@ -1,0 +1,22 @@
+= MdlSql
+
+Modular Sql
+
+Modular Sql is a modular query builder that enables a high database compatibility, usage easiness and dynamic construction. It is intended to allow any kind of query in any database, but will, at the moment, only handle relatively simple ones to most common databases.
+
+<b>Actual situation:</b>
+Simple mysql queries (select, insert, update)
+No joins
+ 
+<b>Mysql output:</b> MysqlResult object, more info @ https://github.com/brianmario/mysql2usage
+
+== Usage
+
+Simple select:
+ 	result = Array.new
+ 	result = MdlSql::select.from(:users).where(:id, 1, '=').execute
+
+When selecting columns use .cols()/.columns, which can receive a Hash or an Array. In case a Hash is passed, the key will be the alias and the value the actual name of the column (f.e. 'users.username').
+
+Simple insert
+  result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
