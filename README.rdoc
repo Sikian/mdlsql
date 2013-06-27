@@ -4,24 +4,45 @@ Modular Sql
 
 Modular Sql is a modular query builder that enables a high database compatibility, usage easiness and dynamic construction. It is intended to allow any kind of query in any database, but will, at the moment, only handle relatively simple ones to most common databases.
 
-<b>Actual situation:</b>
-Simple mysql queries (select, insert, update)
-No joins
- 
-<b>Mysql output:</b> MysqlResult object, more info @ https://github.com/brianmario/mysql2usage
+It actually does a similar job to ActiveRecord, but I believe it may allow a better control in some aspects as it lies somehow between raw queries and that uberuseful gem.
 
+<b>Actual situation:</b>
+* Simple mysql queries (select, insert, update)
+* No joins
+ 
 == Usage
 
-Simple select:
- result = Array.new
- result = MdlSql::select.from(:users).where(:id, 1, '=').execute
-
-When selecting columns use .cols()/.columns, which can receive a Hash or an Array. In case a Hash is passed, the key will be the alias and the value the actual name of the column (f.e. 'users.username').
-
-Simple insert
- result = MdlSql::insert.into(:users).cols(:user, :role).values('admin',2).execute
+<b>Select:</b>
+ result = MdlSql::select.from(:users).where(:role, 2, '=').execute
  
- == License
+
+This will build and execute the following query:
+ SELECT * FROM users WHERE role = 2
+
+We finally iterate over the results:
+ results.each do |row|
+   puts row[:username]
+ end
+
+You can read more about the usage of the MysqlResult object @ https://github.com/brianmario/mysql2usage
+
+When selecting columns use .cols()/.columns(), which can receive a Hash or an Array. In case a Hash is passed, the key will be the alias and the value the actual name of the column (f.e. 'users.username').
+
+<b>Insert:</b>
+ result = MdlSql::insert.into(:users).cols(:username, :role).values('admin',2).execute
+ 
+<b>Update:</b> 
+ result = MdlSql::update(:users).set(:role => '1').where(@username = 'default'").execute
+ 
+Updating follows mysql building way. Remember that you can still use .table() if you feel more comfortable.
+
+ 
+ 
+== Useful Links
+
+* Mysql2: https://github.com/brianmario/mysql2usage
+ 
+== License
  
 Copyright (C) 2013 MdlSql contributers 
 
