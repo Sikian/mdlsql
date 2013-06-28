@@ -28,16 +28,6 @@ path = File.dirname(__FILE__) + "/mdlsql/"
 end
 
 module MdlSql
-  # @!method select()
-	# @!method insert()
-	# @!method update()
-	# @!method config()
-	# 	Calls SqlQuery.config to configurate futures queries. 
-	# 	@todo Allow many simultaneous configurations. For the moment being, use different config files.
-	# 	@option values [Symbol]
-	
-	# module_function :select, :insert, :update, :config
-
 	@host = String.new
 
 	def select()
@@ -55,6 +45,9 @@ module MdlSql
 	  return query
 	end
 
+	# Calls SqlQuery.config to configurate futures queries. 
+	# @todo Allow many simultaneous configurations. For the moment being, use different config files.
+	# @option values [Symbol]
 	def config(values={})
 		SqlQuery.config(values)
 	end

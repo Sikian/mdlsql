@@ -68,7 +68,7 @@ module MdlSql
 
 	  def select()
 	    # Sets method to select
-			#		@return (@see initialize)
+			#	@return (@see initialize)
 	    @method = :select
 			
 			return self
@@ -94,10 +94,10 @@ module MdlSql
 	  # 	set
 	  #
 
-	  def columns(*values)
-	  	# @todo check column uniqueness in hash
-	  	# @todo revise 
+  	#	@todo check column uniqueness in hash
+  	#	@todo revise 
 		# @return (@see initialize)
+	  def columns(*values)
 			@cols ||= Hash.new
 
 
@@ -116,11 +116,13 @@ module MdlSql
 
 		alias_method :cols, :column
 
-	  def from(table, table_alias=nil)
-			# Selects table from which to select (or insert, update) with possible alias.
-			# @todo use a hash here to allow many tables (for a select, for example).
-			# @note use into() when inserting for readability.
-			#	@return (@see initialize)
+		###
+		# @!method table(table, table_alias=nil)
+		# 	Selects table from which to select (or insert, update) with possible alias.
+		# 	@todo use a hash here to allow many tables (for a select, for example).
+		# 	@note use from() when selecting & into() when inserting for readability.
+		#		@return (@see initialize)
+	  def table(table, table_alias=nil)
 			table = table.to_sym if table.is_a? String
 			table_alias = table_alias if table_alias.is_a? String
 
@@ -130,7 +132,8 @@ module MdlSql
 		end
 
 		# alias into() and from() select table 
-		alias_method :into, :from
+		alias_method :into, :table
+		alias_method :from, :table
 	  
 
 	  def where(first, second=nil, comp=nil)
@@ -175,11 +178,11 @@ module MdlSql
 		end
 
 		###
+		# @!method execute()
 		# Exacution command
-
+	 	# @todo return true/false when inserting/updating 
+		# @todo config for different db
 	  def execute
-	 		# @todo return true/false when inserting/updating 
-			# @todo config for different db
 			unless @@host && @@username && @@password && @@db
 				raise 'MdlSql has not been correctly configured, please use config() to set host, username, password and db.'
 			end

@@ -7,8 +7,9 @@ Modular Sql is a modular query builder that enables a high database compatibilit
 It actually does a similar job to ActiveRecord, but I believe it may allow a better control in some aspects as it lies somehow between raw queries and that uberuseful gem.
 
 <b>Actual situation:</b>
-* Simple mysql queries (select, insert, update)
-* No joins
+* Simple mysql queries (select, insert, update).
+* No <i>joins</i>.
+* Just one <i>where</i> condition (if you need more than one, use #where(all_conditions_together).
  
 == Usage
 
@@ -33,14 +34,32 @@ When selecting columns use .cols()/.columns(), which can receive a Hash or an Ar
  
 <b>Update:</b> 
  result = MdlSql::update(:users).set(:role => '1').where(@username = 'default'").execute
- 
-Updating follows mysql building way. Remember that you can still use .table() if you feel more comfortable.
 
+Updating follows mysql building way. Remember that you can still use .table() if you feel more comfortable. 
  
- 
+== Fast documentation
+
+===#table(table_name, table_alias) (#from, #into):
+Select table to use.
+
+=== #where(first_term, sencond_term, operator):
+Where condition.
+This can be used both passing each separate term (recommended) and introducing the whole comparison as the first_term (i.e. .where('id = 1')). The first way will provide a higher compatibility with other databases, but may not be as useful when needing more than a simple condition.
+
+TODO: expand where to include AND, OR, etc. in order to be able to concatenate many conditions.
+
+
+== Installing
+
+	gem install mdlsql
+
+If you're going to use mysql, mysql2 is required. Please follow these instructions to install: https://github.com/brianmario/mysql2#installing (really worth it, even if you're not going to use mdlsql ;) ).
+
 == Useful Links
 
 * Mysql2: https://github.com/brianmario/mysql2usage
+
+* RubyGems: https://rubygems.org/gems/mdlsql
  
 == License
  
