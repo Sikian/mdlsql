@@ -134,8 +134,8 @@ module MdlSql
 		end
 
 		# alias into() and from() select table 
-		alias_method :into, :table
-		alias_method :from, :table
+		alias_method :into, :tables
+		alias_method :from, :tables
 	  
 
 	 #  def where(first, second=nil, comp=nil)
@@ -156,14 +156,29 @@ module MdlSql
 		# end
 
 		# Generates a where clause
+		# Maybe it's a good idea to make a Where object.
 		#
-		# @option opts [Symbol] :table
-		# @option opts [Symbol] :as table alias
-		# @option opts [String] :operator default is =
-		# @option opts [Symbol] :concat AND, OR...
+		# FFS, HAVE A CLEAR IDEA BEFORE WRITING!
+		#
+		# @option opts [String] :op default is =
+		# @option opts [Symbol] :concat AND, OR..., default is AND.
+		# @note First where clause's concat is ignored.
 		# 
 		# @todo Add IN, BETWEEN and LIKE (can be done with actual where).
-		def where(opts={})
+		def where(cond1, cond2, opts={})
+			opts[:op] ||= '='
+			opts[:concat] ||= :AND
+
+			@where ||= Array.new
+			wh = Where.new(
+				:cond1 => cond1,
+				:cond2 => cond2,
+				:op => opts[:op],
+				:concat => opts[:concat]
+			)
+			@where.push wh
+
+			return self
 		end
 
 		def values(*val)

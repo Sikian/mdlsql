@@ -17,9 +17,14 @@
 
 module MdlSql
 	class Col
+		# @!attribute table [Table]
+		# @!attribute col [Symbol]
 		attr_accessor :table, :col
-		def initialize table, col
-			table = table.to_sym if table.is_a? String
+
+		# @param table [Table]
+		# @param col [Symbol]
+		def initialize col, table
+			# table = table.to_sym if table.is_a? String
 			col = col.to_sym if col.is_a? String
 
 			@table = table

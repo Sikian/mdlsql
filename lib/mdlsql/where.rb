@@ -15,47 +15,24 @@
 
 # In order to contact the author of this gem, please write to sikian@gmail.com.
 
-path = File.dirname(__FILE__) + "/mdlsql/"
-
-[
- 	"version",
-	"sqlquery",
-
-	"sockets/mysql",
-
-	"table",
-	"col",
-	"where"
-].each do |library|
-	require path + library
-end
-
-require 'yaml'
-
 module MdlSql
-	@host = String.new
+	class Where
+		# @!attribute col1 [Symbol/String]
+		# @!attribute col2 [Symbol/String]
+		# @!attribute op [Symbol]
+		# @!attribute op [Symbol]
 
-	def select()
-	  query = SqlQuery.new.select()
-	  return query
+		attr_accessor :cond1, :cond2, :op, :concat
+
+		# @param table [Table]
+		# @param col [Symbol]
+		def initialize opts={}
+			@cond1 = opts[:cond1]
+			@cond2 = opts[:cond2]
+
+			opts[:op].to_sym if opts[:op].is_a? String
+			@op = opts[:op]
+			@concat = opts[:concat]
+		end
 	end
-
-	def insert
-		query = SqlQuery.new.insert()
-	  return query
-	end
-
-	def update(table=nil)
-		query = SqlQuery.new.update(table)
-	  return query
-	end
-
-	# Calls SqlQuery.config to configurate futures queries. 
-	# @todo Allow many simultaneous configurations. For the moment being, use different config files.
-	# @option values [Symbol]
-	def config(values={})
-		SqlQuery.config(values)
-	end
-
-	module_function :config, :select, :insert, :update
 end
