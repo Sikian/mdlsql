@@ -15,9 +15,6 @@
 
 # In order to contact the author of this gem, please write to sikian@gmail.com.
 
-require_relative './sockets/mysql.rb'
-require 'yaml'
-
 module MdlSql
 	class SqlQuery	
 
@@ -114,20 +111,25 @@ module MdlSql
 			return self
 		end
 
-		alias_method :cols, :column
+		alias_method :cols, :columns
 
 		###
-		# @!method table(table, table_alias=nil)
-		# 	Selects table from which to select (or insert, update) with possible alias.
-		# 	@todo use a hash here to allow many tables (for a select, for example).
-		# 	@note use from() when selecting & into() when inserting for readability.
-		#		@return (@see initialize)
-	  def table(table, table_alias=nil)
-			table = table.to_sym if table.is_a? String
-			table_alias = table_alias if table_alias.is_a? String
+		#
+		# Selects table from which to select (or insert, update) with possible alias.
+		# @todo use a hash here to allow many tables (for a select, for example).
+		# @note use from() when selecting & into() when inserting for readability.
+		#	@return (@see initialize)
+	  def table(tables = {})
+			# table = table.to_sym if table.is_a? String
+			# table_alias = table_alias if table_alias.is_a? String
 
-			@table = table
-			@table_alias = table_alias unless table_alias.nil?
+			@table ||= Array.new
+			tables.each do |table,table_alias|
+				@table.push Table.new table, table_alias
+			end
+
+			# @table = table
+			# @table_alias = table_alias unless table_alias.nil?
 			return self
 		end
 
@@ -230,24 +232,4 @@ module MdlSql
 	end
 end
 
-class Row
-	attr_accessor :table, :row
-	def initialize table, row
-		table = table.to_sym if table.is_a? String
-		row = row.to_sym if row.is_a? String
 
-		@table = table
-		@row = row
-	end
-end
-
-class Table
-	attr_accessor :name, :as
-	def initialize name, as=nil
-		name = name.to_sym if name.is_a? String
-		as = as.to_sym if as.is_a? String
-
-		@name = name
-		@as = as
-	end
-end
