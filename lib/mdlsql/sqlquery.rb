@@ -136,21 +136,32 @@ module MdlSql
 		alias_method :from, :table
 	  
 
-	  def where(first, second=nil, comp=nil)
-			# @param first [String, Array] as a string it can be the whole WHERE declaration or just the first element. As an Array, it contains a list of where declarations
+	 #  def where(first, second=nil, comp=nil)
+		# 	# @param first [String, Array] as a string it can be the whole WHERE declaration or just the first element. As an Array, it contains a list of where declarations
 			
-			@where ||= Array.new
-			if second.nil?
-				@where << first
-			else
-				if comp.nil?
-					raise "Don't know which logical operator to use in the where statement."
-				else
-					@where << "#{first} #{comp} '#{second}'"
-				end
-			end
+		# 	@where ||= Array.new
+		# 	if second.nil?
+		# 		@where << first
+		# 	else
+		# 		if comp.nil?
+		# 			raise "Don't know which logical operator to use in the where statement."
+		# 		else
+		# 			@where << "#{first} #{comp} '#{second}'"
+		# 		end
+		# 	end
 
-			return self
+		# 	return self
+		# end
+
+		# Generates a where clause
+		#
+		# @option opts [Symbol] :table
+		# @option opts [Symbol] :as table alias
+		# @option opts [String] :operator default is =
+		# @option opts [Symbol] :concat AND, OR...
+		# 
+		# @todo Add IN, BETWEEN and LIKE (can be done with actual where).
+		def where(opts={})
 		end
 
 		def values(*val)
@@ -216,5 +227,27 @@ module MdlSql
 			return @result
 
 		end
+	end
+end
+
+class Row
+	attr_accessor :table, :row
+	def initialize table, row
+		table = table.to_sym if table.is_a? String
+		row = row.to_sym if row.is_a? String
+
+		@table = table
+		@row = row
+	end
+end
+
+class Table
+	attr_accessor :name, :as
+	def initialize name, as=nil
+		name = name.to_sym if name.is_a? String
+		as = as.to_sym if as.is_a? String
+
+		@name = name
+		@as = as
 	end
 end
