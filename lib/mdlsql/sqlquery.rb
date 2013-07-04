@@ -119,13 +119,13 @@ module MdlSql
 		# @todo use a hash here to allow many tables (for a select, for example).
 		# @note use from() when selecting & into() when inserting for readability.
 		#	@return (@see initialize)
-	  def table(tables = {})
+	  def tables(tables = {})
 			# table = table.to_sym if table.is_a? String
 			# table_alias = table_alias if table_alias.is_a? String
 
-			@table ||= Array.new
+			@tables ||= Array.new
 			tables.each do |table,table_alias|
-				@table.push Table.new table, table_alias
+				@tables.push Table.new table, table_alias
 			end
 
 			# @table = table
