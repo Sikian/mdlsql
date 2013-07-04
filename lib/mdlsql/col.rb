@@ -16,14 +16,14 @@
 # In order to contact the author of this gem, please write to sikian@gmail.com.
 
 module MdlSql
-	class Row
-		attr_accessor :table, :row
-		def initialize table, row
+	class Col
+		attr_accessor :table, :col
+		def initialize table, col
 			table = table.to_sym if table.is_a? String
-			row = row.to_sym if row.is_a? String
+			col = col.to_sym if col.is_a? String
 
 			@table = table
-			@row = row
+			@col = col
 		end
 	end
 end
