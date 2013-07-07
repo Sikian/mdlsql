@@ -20,12 +20,9 @@ module MdlSql
 		# @!attribute col1 [Symbol/String]
 		# @!attribute col2 [Symbol/String]
 		# @!attribute op [Symbol]
-		# @!attribute op [Symbol]
 
 		attr_accessor :cond1, :cond2, :op, :concat
 
-		# @param table [Table]
-		# @param col [Symbol]
 		def initialize opts={}
 			@cond1 = opts[:cond1]
 			@cond2 = opts[:cond2]

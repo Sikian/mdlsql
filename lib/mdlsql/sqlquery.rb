@@ -52,8 +52,6 @@ module MdlSql
 			@@password = values[:password]
 			@@db = values[:database]
 			@@socket = values[:socket]
-
-			puts values.inspect
 		end
 	  
 		###
@@ -138,23 +136,6 @@ module MdlSql
 		alias_method :from, :tables
 	  
 
-	 #  def where(first, second=nil, comp=nil)
-		# 	# @param first [String, Array] as a string it can be the whole WHERE declaration or just the first element. As an Array, it contains a list of where declarations
-			
-		# 	@where ||= Array.new
-		# 	if second.nil?
-		# 		@where << first
-		# 	else
-		# 		if comp.nil?
-		# 			raise "Don't know which logical operator to use in the where statement."
-		# 		else
-		# 			@where << "#{first} #{comp} '#{second}'"
-		# 		end
-		# 	end
-
-		# 	return self
-		# end
-
 		# Generates a where clause
 		# Maybe it's a good idea to make a Where object.
 		#
@@ -169,6 +150,10 @@ module MdlSql
 			opts[:op] ||= '='
 			opts[:concat] ||= :AND
 
+			# if cond1.is_a? Hash
+			# 	if cond1[:table] && cond1[:col]
+			# 		cond1 = Col.new cond[:col], cond[:table]
+
 			@where ||= Array.new
 			wh = Where.new(
 				:cond1 => cond1,
@@ -179,6 +164,28 @@ module MdlSql
 			@where.push wh
 
 			return self
+		end
+
+		# @option opts [Symbol/String] :op
+		# @option opts [Symbol] :type
+		def join(table, cond1, cond2, opts={})
+			@join ||= Array.new
+
+			vars = {
+				:table => table, 
+				:cond1 => cond1, 
+				:cond2 => cond2, 
+				:op => opts[:op], 
+				:type => opts[:type]
+			}
+			@join.push Join.new vars
+
+			return self
+		end
+
+		def leftjoin(table, cond1, cond2, opts={})
+			opts.update({:type => :left})
+			join(table,cond1,cond2, opts)
 		end
 
 		def values(*val)
@@ -211,7 +218,7 @@ module MdlSql
 	 	# @todo return true/false when inserting/updating 
 		# @todo config for different db
 	  def execute
-			unless @@host && @@username && @@password && @@db
+			if @@host.nil? || @@username.nil? || @@password.nil? || @@db.nil?
 				raise 'MdlSql has not been correctly configured, please use config() to set host, username, password and db.'
 			end
 	    client = Mysql2::Client.new(
@@ -229,20 +236,21 @@ module MdlSql
 			case @@socket
 			when :mysql
 				sock = MysqlBuilder
-				puts sock.class
 			end
 
 			query = sock.send("#{@method}", 
-				{:table => @table, 
+				{:tables => @tables, 
 					:where => @where, 
 					:cols => @cols,
-					:values => @values
+					:values => @values,
+					:join => @join
 			})
 
 
 			@result = client.query query
 			return @result
 
+			return query
 		end
 	end
 end

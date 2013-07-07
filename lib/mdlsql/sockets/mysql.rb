@@ -28,8 +28,9 @@ class MysqlBuilder < QueryBuilder
 	class << self
 		def select(values={})
 			cols = values[:cols]
-			table = values[:table]
+			tables = values[:tables]
 			where = values[:where]
+			join = values[:join]
 
 			query = String.new
 			query = "SELECT"
@@ -44,24 +45,40 @@ class MysqlBuilder < QueryBuilder
 			end
 			
 			# From (with possible alias)
-			if table
-				query << " FROM #{table}"
-				# query << " AS #{table_alias}" if table_alias
+			if tables
+				query << ' FROM'
+				tables.each do |tab|
+					query << ' ' << tab.to_mysql
+					# query << " #{tab.name}"
+					# query << " AS #{tab.as}" if tab.as
+					query << ","
+				end
+				query.chop!
+
 			else
 				raise "No table at select query."
 			end
 			
-			# @leftjoin = {:tablealias => {:name => "tablename", :on => "oncondition"}...}
-			if @leftjoin && @leftjoin.length > 0
-				@leftjoin.each do |key, value|
-					query << " LEFT JOIN #{value[:name]} AS #{key} ON #{value[:on]}"
+			# @join, see Join
+			if join && join.length > 0
+				join.each do |j|
+					query << j.to_mysql
+					# query << ' ' << value[:type] if value[:type]
+					# query << ' ' << value[:table].to_s
+					# query << " ON #{value[:cond1]} #{value[:op]} #{value[:cond2]}"
 				end
 			end
 			# @where = Array
 			if where && where.length > 0
-				query << " WHERE"
-				where.each do |dec|
-					query << " #{dec}"
+				query << "\nWHERE"
+				# where.each do |dec|
+				# 	query << " #{dec}"
+				# end
+				first = true
+				where.each do |wh|
+					query << " #{wh.concat}" unless first
+					query << " #{wh.cond1} #{wh.op} #{wh.cond2}"
+					first = false
 				end
 			end
 
@@ -80,7 +97,6 @@ class MysqlBuilder < QueryBuilder
 				raise "No table at insert query."
 			end
 
-			puts @cols.inspect
 			if @cols && @cols.count > 0
 				query << ' ('
 				@cols.each do |key,col|

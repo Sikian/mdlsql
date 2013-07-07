@@ -48,6 +48,8 @@ This can be used both passing each separate term (recommended) and introducing t
 
 TODO: expand where to include AND, OR, etc. in order to be able to concatenate many conditions.
 
+=== #columns(*values)
+
 
 == Installing
 

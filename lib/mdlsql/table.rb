@@ -25,5 +25,12 @@ module MdlSql
 			@name = name
 			@as = as if as
 		end
+
+		def to_mysql
+			s = String.new
+			s << @name.to_s
+			s << ' AS ' << @as.to_s if @as
+			return s
+		end
 	end
 end
