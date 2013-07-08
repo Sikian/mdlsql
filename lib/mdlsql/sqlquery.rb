@@ -52,6 +52,7 @@ module MdlSql
 			@@password = values[:password]
 			@@db = values[:database]
 			@@socket = values[:socket]
+			@@debug = values[:debug]
 		end
 	  
 		###
@@ -91,11 +92,12 @@ module MdlSql
 
   	#	@todo check column uniqueness in hash
   	#	@todo revise 
+  	# @todo use Col class
 		# @return (@see initialize)
 	  def columns(*values)
 			@cols ||= Hash.new
 
-
+			# key AS value
 			if values[0].is_a? Hash
 				values.each do |val|
 					@cols.update(val)
@@ -246,11 +248,13 @@ module MdlSql
 					:join => @join
 			})
 
+			if @@debug
+				return query
+			else
+				@result = client.query query
+				return @result
+			end
 
-			@result = client.query query
-			return @result
-
-			return query
 		end
 	end
 end
