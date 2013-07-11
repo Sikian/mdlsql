@@ -77,7 +77,14 @@ module MdlSql
 
 	  def update(table=nil)
 	  	@method = :update
-	  	from table if table
+
+	  	if table.is_a? Symbol
+	  		from table => table
+	  	elsif table.is_a? String
+	  		from table.to_sym => table.to_sym
+	  	elsif table.is_a? Hash
+	  		from table
+	  	end
 			return self
 	  end
 	  
@@ -124,7 +131,7 @@ module MdlSql
 			# table_alias = table_alias if table_alias.is_a? String
 
 			@tables ||= Array.new
-			tables.each do |table,table_alias|
+			tables.each do |table_alias,table|
 				@tables.push Table.new table, table_alias
 			end
 
@@ -149,7 +156,7 @@ module MdlSql
 		# 
 		# @todo Add IN, BETWEEN and LIKE (can be done with actual where).
 		def where(cond1, cond2, opts={})
-			opts[:op] ||= '='
+			opts[:op] ||= :'='
 			opts[:concat] ||= :AND
 
 			# if cond1.is_a? Hash
@@ -177,9 +184,8 @@ module MdlSql
 				:table => table, 
 				:cond1 => cond1, 
 				:cond2 => cond2, 
-				:op => opts[:op], 
-				:type => opts[:type]
 			}
+			vars.merge! opts
 			@join.push Join.new vars
 
 			return self
@@ -245,15 +251,13 @@ module MdlSql
 					:where => @where, 
 					:cols => @cols,
 					:values => @values,
-					:join => @join
-			})
+					:join => @join}
+			)
 
-			if @@debug
-				return query
-			else
-				@result = client.query query
-				return @result
-			end
+			puts query if @@debug
+
+			@result = client.query query
+			return @result
 
 		end
 	end

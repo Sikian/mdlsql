@@ -38,20 +38,20 @@ class MysqlBuilder < QueryBuilder
 			# Columns (with alias)
 			if cols	
 				cols.each do |key,value|
-					query << " #{value} AS #{key}"
+					query << " #{value} AS #{key}" << ','
 				end
+				query.chop!
 			else
 				query << " *"
 			end
 			
 			# From (with possible alias)
 			if tables
-				query << ' FROM'
+				query << "\nFROM"
 				tables.each do |tab|
-					query << ' ' << tab.to_mysql
+					query << ' ' << tab.to_mysql << ','
 					# query << " #{tab.name}"
 					# query << " AS #{tab.as}" if tab.as
-					query << ","
 				end
 				query.chop!
 
@@ -87,19 +87,29 @@ class MysqlBuilder < QueryBuilder
 
 		def insert(values={})
 			# INSERT INTO table (column1, column2) VALUES (v1c1, v1c2), (v2c1, v2c2)
+			cols = values[:cols]
+			tables = values[:tables]
+			where = values[:where]
+			vals = values[:values]
 
 			query = String.new
 			query = 'INSERT INTO'
 
-			if @from
-				query << " #{@from}"
+			if tables
+				tables.each do |tab|
+					query << ' ' << tab.name.to_s << ','
+					# query << " #{tab.name}"
+					# query << " AS #{tab.as}" if tab.as
+				end
+				query.chop!
+
 			else
-				raise "No table at insert query."
+				raise "No tables at insert query."
 			end
 
-			if @cols && @cols.count > 0
+			if cols && cols.count > 0
 				query << ' ('
-				@cols.each do |key,col|
+				cols.each do |key,col|
 					query << "#{col},"
 				end
 
@@ -108,8 +118,8 @@ class MysqlBuilder < QueryBuilder
 
 			query << ' VALUES'
 
-			if @values
-				@values.each do |row|
+			if vals
+				vals.each do |row|
 					query << ' ('
 					row.each do |val|
 						query << "'#{val}'" << ','
@@ -128,19 +138,26 @@ class MysqlBuilder < QueryBuilder
 		def update(values={})
 			# UPDATE example SET age='22' WHERE age='21'
 
-			table = values[:table]
+			tables = values[:tables]
 			set = values[:values]
 			where = values[:where]
 
 			query = String.new()
 
-			if table
-				query << "UPDATE #{table} "
+			if tables
+				query << "UPDATE"
+				tables.each do |tab|
+					query << ' ' << tab.to_mysql << ','
+					# query << " #{tab.name}"
+					# query << " AS #{tab.as}" if tab.as
+				end
+				query.chop!
+
 			else
 				raise "No table at update query."
 			end
 
-			query << 'SET'
+			query << "\nSET"
 
 			if set && set.count > 0
 				set.each do |key, value|
@@ -151,13 +168,17 @@ class MysqlBuilder < QueryBuilder
 				raise 'Nothing to be set.'
 			end
 
-			query << ' WHERE'
-
-			if where && where.count > 0
-				where.each do |con|
-					query << ' ' << con << ','
+			if where && where.length > 0
+				query << "\nWHERE"
+				# where.each do |dec|
+				# 	query << " #{dec}"
+				# end
+				first = true
+				where.each do |wh|
+					query << " #{wh.concat}" unless first
+					query << " #{wh.cond1} #{wh.op} #{wh.cond2}"
+					first = false
 				end
-				query.chop!
 			else
 				raise 'No WHERE condition in update.'
 			end

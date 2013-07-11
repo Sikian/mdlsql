@@ -28,6 +28,7 @@ module MdlSql
 			@cond2 = opts[:cond2]
 
 			opts[:op].to_sym if opts[:op].is_a? String
+			opts[:concat].to_sym if opts[:concat].is_a? String
 			@op = opts[:op]
 			@concat = opts[:concat]
 		end
