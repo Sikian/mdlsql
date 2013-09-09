@@ -28,7 +28,7 @@ module MdlSql
 		def initialize opts={}
 			@cond1 = opts[:cond1]
 			@cond2 = opts[:cond2]
-			@table = Table.new opts[:table], opts[:as]
+			@table = Table.new opts[:table]
 			@type = opts[:type]
 
 			opts[:op].to_sym if opts[:op].is_a? String

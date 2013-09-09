@@ -44,12 +44,16 @@ module MdlSql
 
 	def insert
 		query = SqlQuery.new.insert()
-	  return query
+	  	return query
 	end
 
 	def update(table=nil)
 		query = SqlQuery.new.update(table)
 	  return query
+	end
+
+	def query str
+		return SqlQuery.new.query(str)
 	end
 
 	# Calls SqlQuery.config to configurate futures queries. 
@@ -59,5 +63,5 @@ module MdlSql
 		SqlQuery.config(values)
 	end
 
-	module_function :config, :select, :insert, :update
+	module_function :config, :select, :insert, :update, :query
 end

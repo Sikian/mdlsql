@@ -19,7 +19,25 @@ module MdlSql
 	class Table
 		attr_accessor :name, :as
 		def initialize name, as=nil
-			name = name.to_sym if name.is_a? String
+
+			if name.is_a? String
+				name = name.to_sym
+			elsif name.is_a? Hash
+				name = name.flatten
+
+				if name[1].is_a? String
+					as = name[1].to_sym
+				else
+					as = name[1]
+				end
+
+				if name[0].is_a? String
+					name = name[0].to_sym
+				else
+					name = name[0]
+				end
+			end
+
 			as = as.to_sym if as.is_a? String
 
 			@name = name

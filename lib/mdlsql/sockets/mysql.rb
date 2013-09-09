@@ -38,7 +38,7 @@ class MysqlBuilder < QueryBuilder
 			# Columns (with alias)
 			if cols	
 				cols.each do |key,value|
-					query << " #{value} AS #{key}" << ','
+					query << " #{key} AS #{value}" << ','
 				end
 				query.chop!
 			else
@@ -179,8 +179,6 @@ class MysqlBuilder < QueryBuilder
 					query << " #{wh.cond1} #{wh.op} #{wh.cond2}"
 					first = false
 				end
-			else
-				raise 'No WHERE condition in update.'
 			end
 
 			return query

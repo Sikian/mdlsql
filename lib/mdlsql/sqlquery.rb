@@ -131,9 +131,14 @@ module MdlSql
 			# table_alias = table_alias if table_alias.is_a? String
 
 			@tables ||= Array.new
-			tables.each do |table_alias,table|
-				@tables.push Table.new table, table_alias
+			if tables.is_a? Hash
+				tables.each do |table, table_alias|
+					@tables.push Table.new table, table_alias
+				end
+			elsif tables.is_a? Symbol
+				@tables.push Table.new tables, tables
 			end
+				
 
 			# @table = table
 			# @table_alias = table_alias unless table_alias.nil?
@@ -225,40 +230,53 @@ module MdlSql
 		# Exacution command
 	 	# @todo return true/false when inserting/updating 
 		# @todo config for different db
-	  def execute
+	 	def execute opts={}
 			if @@host.nil? || @@username.nil? || @@password.nil? || @@db.nil?
 				raise 'MdlSql has not been correctly configured, please use config() to set host, username, password and db.'
 			end
-	    client = Mysql2::Client.new(
-	    	:host => @host, 
-	    	:username => @@username, 
-	    	:password => @@password, 
-	    	:database => @@db,
-				:symbolize_keys => true
-			)
-			
-			query = String.new
-
-			@@socket ||= :mysql
-
-			case @@socket
-			when :mysql
-				sock = MysqlBuilder
+			unless $client
+			    $client = Mysql2::Client.new(
+			    	:host => @@host, 
+			    	:username => @@username, 
+			    	:password => @@password, 
+			    	:database => @@db,
+						:symbolize_keys => true
+				)
 			end
 
-			query = sock.send("#{@method}", 
-				{:tables => @tables, 
-					:where => @where, 
-					:cols => @cols,
-					:values => @values,
-					:join => @join}
-			)
+			if opts[:query]
+				query = opts[:query]
+			else			
+				query = String.new
 
-			puts query if @@debug
+				@@socket ||= :mysql
 
-			@result = client.query query
+				case @@socket
+				when :mysql
+					sock = MysqlBuilder
+				end
+
+				query = sock.send("#{@method}", 
+					{:tables => @tables, 
+						:where => @where, 
+						:cols => @cols,
+						:values => @values,
+						:join => @join}
+				)
+			end
+
+			puts "Query: \n#{query}" if @@debug
+
+			@result = $client.query query
 			return @result
 
+		end
+
+		# Just execute a query.
+		# Compromises compatibility.
+		
+		def query str
+			execute :query => str
 		end
 	end
 end
